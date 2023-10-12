@@ -144,12 +144,6 @@
 			window.close();
 		}
 
-		void btn_toplist( Element@ self, Event@ evt )
-		{
-			game.execAppend( "top; toggleconsole\n" );
-			window.close();
-		}
-
 		void btn_randmap( Element@ self, Event@ evt )
 		{
 			game.execAppend( "callvote randmap *\n" );
@@ -167,9 +161,6 @@
 
 		void loadRecommended()
 		{
-			// game.exec( "exec configs/freestyle_recommended.cfg silent\n" );
-			// can't execute configs in pk3's ?
-
 			game.execAppend('seta cg_clientHUD "ale_freestyle"\n');
 			game.execAppend('seta cg_specHUD "ale_freestyle"\n');
 
@@ -236,8 +227,8 @@
 							<keyselect bind="use Rocket Launcher"/>
 							<div class="title"><t>Plasmagun</t> (PG)</div>
 							<keyselect bind="use Plasmagun"/>
-							<div class="title">Toggle practicemode</div>
-							<keyselect bind="practicemode"/>
+							<div class="title">Grappling Hook</div>
+							<keyselect bind="+hook"/>
 							<div class="title">Save position</div>
 							<keyselect bind="position save"/>
 							<div class="title">Noclip mode</div>
@@ -266,7 +257,6 @@
 				<h2>Commands</h2>
 				<div>
 					<button onclick="$btn_recommended">Recommended settings</button>
-					<button onclick="$btn_toplist">Show toplist</button>
 					<button onclick="$btn_randmap">Vote random map</button>
 				</div>
 				<h2>Help</h2>

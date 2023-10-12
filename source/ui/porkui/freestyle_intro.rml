@@ -63,14 +63,14 @@
 		<h1>Welcome to Freestyle</h1>
 		<div id="menu-freestyle">
 			<div id="bla">
-				This mod has several improvements from vanilla race.<br/>
-				The following binds are more or less required for racing:
+				This is your movement playground!<br/>
+				It is recommended that you set the following binds:
 			</div>
 			<hr class="nicehr"/><br />
 			<div>
 				<div id="leftcolumn">
 					<optionsform id="binds-options-form">
-						<div class="title">Restart race</div>
+						<div class="title">Restart</div>
 						<keyselect bind="join"/>
 						<div class="title"><t>Grenade Launcher</t> (GL)</div>
 						<keyselect bind="use Grenade Launcher"/>
@@ -78,8 +78,8 @@
 						<keyselect bind="use Rocket Launcher"/>
 						<div class="title"><t>Plasmagun</t> (PG)</div>
 						<keyselect bind="use Plasmagun"/>
-						<div class="title">Toggle practicemode</div>
-						<keyselect bind="practicemode"/>
+						<div class="title">Grappling Hook</div>
+						<keyselect bind="+hook"/>
 						<div class="title">Save position</div>
 						<keyselect bind="position save"/>
 						<div class="title">Noclip mode</div>
@@ -89,7 +89,7 @@
 					</optionsform>
 				</div>
 				<div id="rightcolumn">
-					Freestyle has its own in-game menu that you can open using F6 or pressing Escape and clicking the "Race options" button.
+					Freestyle has its own in-game menu that you can open using F6 or pressing Escape and clicking the "Freestyle options" button.
 				</div>
 			</div>
 			<hr class="nicehr"/><br />
