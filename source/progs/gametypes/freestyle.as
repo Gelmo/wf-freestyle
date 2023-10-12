@@ -452,6 +452,8 @@ void GT_InitGametype()
                  + "set g_countdown_time \"5\"\n"
                  + "set g_maxtimeouts \"0\" // -1 = unlimited\n"
                  + "set g_challengers_queue \"0\"\n"
+                 + "set g_noclass_inventory \"gb mg rg gl rl pg lg eb cells shells grens rockets plasma lasers bolts bullets\"\n"
+                 + "set g_class_strong_ammo \"99 99 99 99 99 99 99 99\" // GB MG RG GL RL PG LG EB\n"
                  + "\necho " + gametype.name + ".cfg executed\n";
 
         G_WriteFile( "configs/server/gametypes/" + gametype.name + ".cfg", config );

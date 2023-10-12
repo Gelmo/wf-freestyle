@@ -11,6 +11,9 @@ const float PULL_MARGIN = 16.0f;
 
 const uint BIG_LIST = 15;
 
+Cvar g_noclass_inventory( "g_noclass_inventory", "gb mg rg gl rl pg lg eb cells shells grens rockets plasma lasers bolts bullets", 0 );
+Cvar g_class_strong_ammo( "g_class_strong_ammo", "99 99 99 99 99 99 99 99", 0 ); // GB MG RG GL RL PG LG EB
+
 Player[] players( maxClients );
 
 class Player
@@ -555,13 +558,44 @@ class Player
         if ( gametype.isInstagib )
             this.client.inventoryGiveItem( WEAP_INSTAGUN );
         else
-            this.client.inventorySetCount( WEAP_GUNBLADE, 1 );
+        {
+    	    // give the weapons and ammo as defined in cvars
+    	    String token, weakammotoken, ammotoken;
+    	    String itemList = g_noclass_inventory.string;
+    	    String ammoCounts = g_class_strong_ammo.string;
 
-        // select rocket launcher if available
-        if ( this.client.canSelectWeapon( WEAP_ROCKETLAUNCHER ) )
-            this.client.selectWeapon( WEAP_ROCKETLAUNCHER );
-        else
-            this.client.selectWeapon( -1 ); // auto-select best weapon in the inventory
+            this.client.inventoryClear();
+
+            for ( int i = 0; ;i++ )
+            {
+                token = itemList.getToken( i );
+                if ( token.len() == 0 )
+                    break; // done
+
+                Item @item = @G_GetItemByName( token );
+                if ( @item == null )
+                    continue;
+
+                this.client.inventoryGiveItem( item.tag );
+
+                // if it's ammo, set the ammo count as defined in the cvar
+                if ( ( item.type & IT_AMMO ) != 0 )
+                {
+                    token = ammoCounts.getToken( item.tag - AMMO_GUNBLADE );
+
+                    if ( token.len() > 0 )
+                    {
+                        this.client.inventorySetCount( item.tag, token.toInt() );
+                    }
+                }
+            }
+
+            // select rocket launcher if available
+            if ( this.client.canSelectWeapon( WEAP_ROCKETLAUNCHER ) )
+                this.client.selectWeapon( WEAP_ROCKETLAUNCHER );
+            else
+                this.client.selectWeapon( -1 ); // auto-select best weapon in the inventory
+        }
 
         this.loadPosition( "", Verbosity_Silent );
 
