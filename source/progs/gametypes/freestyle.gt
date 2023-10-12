@@ -20,7 +20,6 @@ freestyle/entities/target_init.as;
 freestyle/utils.as;
 freestyle/commands.as;
 freestyle/player.as;
-freestyle/run.as;
 freestyle/math.as;
 freestyle/position.as;
 freestyle/positionstore.as;

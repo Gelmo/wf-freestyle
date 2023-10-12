@@ -62,8 +62,6 @@ void RACE_playerKilled( Entity@ target, Entity@ attacker, Entity@ inflicter )
 {
     if ( @target == null || @target.client == null )
         return;
-
-    RACE_GetPlayer( target.client ).cancelRace();
 }
 
 void RACE_SetUpMatch()
@@ -236,13 +234,6 @@ void GT_PlayerRespawn( Entity@ ent, int old_team, int new_team )
             ent.client.team = TEAM_SPECTATOR;
             ent.client.respawn(false);
         }
-
-        if ( !Pending_AnyRacing() )
-        {
-            pending_endmatch = false;
-            match.launchState(MATCH_STATE_POSTMATCH);
-        }
-
         return;
     }
 
@@ -320,40 +311,9 @@ bool GT_MatchStateFinished( int incomingMatchState )
         // msc: check for overtime
         G_CmdExecute("set g_inactivity_maxtime 5\n");
         G_CmdExecute("set g_disable_vote_remove 0\n");
-        if ( Pending_AnyRacing(true) )
-        {
-            G_AnnouncerSound( null, G_SoundIndex( "sounds/announcer/overtime/overtime" ), GS_MAX_TEAMS, false, null );
-            pending_endmatch = true;
-            return false;
-        }
     }
 
     return true;
-}
-
-bool Pending_AnyRacing(bool respawn = false)
-{
-    bool any_racing = false;
-    for ( int i = 0; i < maxClients; i++ )
-    {
-        Client@ client = G_GetClient( i );
-        if ( client.state() < CS_SPAWNED )
-            continue;
-
-        Player@ player = RACE_GetPlayer( client );
-        if ( player.inRace && !player.postRace && client.team != TEAM_SPECTATOR )
-            any_racing = true;
-        else
-        {
-            if ( client.team != TEAM_SPECTATOR )
-            {
-                client.team = TEAM_SPECTATOR;
-                if ( respawn )
-                    client.respawn( false );
-            }
-        }
-    }
-    return any_racing;
 }
 
 // the match state has just moved into a new state. Here is the

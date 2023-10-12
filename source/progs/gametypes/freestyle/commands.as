@@ -152,12 +152,10 @@ bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &arg
 
     if ( pending_endmatch || match.getState() >= MATCH_STATE_POSTMATCH )
     {
-        if ( !( player.inRace || player.postRace ) )
-            return true;
+        return true;
     }
 
     bool recalled = player.recalled;
-    player.cancelRace();
     player.recalled = recalled;
 
     Entity@ ent = client.getEnt();

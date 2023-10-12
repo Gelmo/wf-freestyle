@@ -17,17 +17,12 @@ class Player
 {
     Client@ client;
 
-    bool inRace;
-    uint startTime;
     int currentSector;
     Table report( S_COLOR_ORANGE + "l " + S_COLOR_WHITE + "r " + S_COLOR_ORANGE + "/ l r " + S_COLOR_ORANGE + "/ l r " + S_COLOR_ORANGE + "/ l " + S_COLOR_WHITE + "r" + S_COLOR_ORANGE + "l r" );
     Table practiceReport( S_COLOR_CYAN + "l " + S_COLOR_WHITE + "r " + S_COLOR_CYAN + "/ l r " + S_COLOR_CYAN + "/ l r " + S_COLOR_CYAN + "/ l " + S_COLOR_WHITE + "r" + S_COLOR_CYAN + "l r" );
 
-    bool postRace;
-    Run run;
     uint forceRespawn;
 
-    uint nextRunPositionTime;
     int positionCycle;
 
     bool practicing;
@@ -74,8 +69,6 @@ class Player
         this.recallHold = RECALL_HOLD;
 
         this.currentSector = 0;
-        this.inRace = false;
-        this.postRace = false;
         this.forceRespawn = 0;
         this.practicing = false;
         this.recalled = false;
@@ -83,8 +76,6 @@ class Player
         this.autoRecallStart = -1;
         this.release = 0;
         this.practiceFinish = 0;
-        this.startTime = 0;
-        this.nextRunPositionTime = 0;
         this.positionCycle = 0;
         this.nextRunPositionTime = 0;
         this.noclipSpawn = false;
@@ -129,7 +120,7 @@ class Player
 
     bool preRace()
     {
-        return !this.inRace && !this.practicing && !this.postRace && this.client.team != TEAM_SPECTATOR && this.client.getEnt().health > 0;
+        return !this.practicing && this.client.team != TEAM_SPECTATOR && this.client.getEnt().health > 0;
     }
 
     void setQuickMenu()
@@ -198,7 +189,6 @@ class Player
 
         if ( ent.moveType == MOVETYPE_PLAYER )
         {
-            this.cancelRace();
             ent.moveType = MOVETYPE_NOCLIP;
             this.noclipWeapon = ent.weapon;
         }
@@ -209,7 +199,6 @@ class Player
             this.client.selectWeapon( this.noclipWeapon );
             if ( this.recalled && moveType == MOVETYPE_NONE )
             {
-                this.startTime = this.timeStamp() - this.savedPosition().currentTime;
                 if ( this.lerpTo.saved )
                 {
                     this.applyPosition( this.lerpTo );
@@ -300,10 +289,7 @@ class Player
             ent.set_velocity( Vec3() );
         else if ( this.practicing && position.recalled )
         {
-            this.cancelRace();
-            this.startTime = this.timeStamp() - position.currentTime;
             this.recalled = true;
-            this.nextRunPositionTime = this.timeStamp() + this.positionInterval;
             this.autoRecallStart = this.positionCycle;
         }
         else if ( this.practicing )
@@ -342,8 +328,6 @@ class Player
         this.recalled = true;
         saved.skipWeapons = false;
 
-        this.startTime = this.timeStamp() - position.currentTime;
-
         this.setQuickMenu();
         this.updateHelpMessage();
 
@@ -366,7 +350,6 @@ class Player
         result.armor = ref.armor;
         result.skipWeapons = false;
         result.currentSector = this.currentSector;
-        result.currentTime = this.raceTime();
         for ( int i = WEAP_NONE + 1; i < WEAP_TOTAL; i++ )
         {
             result.weapons[i] = ref.canSelectWeapon( i );
@@ -492,44 +475,6 @@ class Player
             this.loadPosition( "", Verbosity_Silent );
             this.release = 0;
         }
-    }
-
-    bool startRace()
-    {
-        if ( this.practicing && this.autoRecall && !this.recalled )
-        {
-            this.run.clear();
-            this.startTime = this.timeStamp();
-            this.recalled = true;
-            this.positionCycle = 0;
-            this.nextRunPositionTime = this.timeStamp() + this.positionInterval;
-            this.autoRecallStart = -1;
-            this.updateHelpMessage();
-            return true;
-        }
-
-        if ( !this.preRace() )
-            return false;
-
-        if ( RS_QueryPjState( this.client.playerNum )  )
-        {
-            this.client.addAward( S_COLOR_RED + "Prejumped!" );
-            this.respawn();
-            RS_ResetPjState( this.client.playerNum );
-            return false;
-        }
-
-        this.currentSector = 0;
-        this.inRace = true;
-        this.startTime = this.timeStamp();
-        this.positionCycle = 0;
-        this.nextRunPositionTime = this.timeStamp() + this.positionInterval;
-
-        this.run.clear();
-        this.report.reset();
-        this.setQuickMenu();
-
-        return true;
     }
 
     int getSpeed()
@@ -658,21 +603,9 @@ class Player
         }
     }
 
-    bool validTime()
-    {
-        return this.timeStamp() >= this.startTime;
-    }
-
-    uint raceTime()
-    {
-        return this.timeStamp() - this.startTime;
-    }
-
     void spawn( int oldTeam, int newTeam )
     {
         this.forceRespawn = 0;
-
-        this.cancelRace();
 
         this.setQuickMenu();
         this.updateHelpMessage();
@@ -755,34 +688,13 @@ class Player
         Client@ client = this.client;
         Entity@ ent = client.getEnt();
 
-        // all stats are set to 0 each frame, so it's only needed to set a stat if it's going to get a value
-        if ( this.inRace || ( this.practicing && this.recalled && ent.health > 0 ) )
-        {
-            if ( ent.moveType == MOVETYPE_NONE )
-                client.setHUDStat( STAT_TIME_SELF, this.savedPosition().currentTime / 100 );
-            else
-                client.setHUDStat( STAT_TIME_SELF, this.raceTime() / 100 );
-        }
-
         client.setHUDStat( STAT_TIME_ALPHA, -9999 );
         client.setHUDStat( STAT_TIME_BETA, -9999 );
 
         this.checkNoclipAction();
-        this.updateMaxSpeed();
         this.checkRelease();
 
         this.updateHelpMessage();
-
-        // msc: temporary MAX_ACCEL replacement
-        if ( frameTime > 0 )
-        {
-            float cgframeTime = float( frameTime ) / 1000;
-            float base_speed = client.pmoveMaxSpeed;
-            float base_accel = base_speed * cgframeTime;
-            float speed = HorizontalSpeed( ent.velocity );
-            int max_accel = int( ( sqrt( speed * speed + base_accel * ( 2 * base_speed - base_accel ) ) - speed ) / cgframeTime );
-            client.setHUDStat( STAT_PROGRESS_SELF, max_accel );
-        }
 
         if ( client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR )
         {
@@ -794,62 +706,11 @@ class Player
                     ent.health = ent.maxHealth;
             }
         }
-
-        if ( this.postRace && this.forceRespawn > 0 && this.forceRespawn < levelTime )
-            this.respawn();
-    }
-
-    void cancelRace()
-    {
-        Entity@ ent = this.client.getEnt();
-
-        if ( this.inRace && this.currentSector > 0 )
-        {
-            uint rows = this.report.numRows();
-            for ( uint i = 0; i < rows; i++ )
-                G_PrintMsg( ent, this.report.getRow( i ) + "\n" );
-            G_PrintMsg( ent, S_COLOR_ORANGE + "Race cancelled, max speed " + S_COLOR_WHITE + this.run.maxSpeed + "\n" );
-        }
-
-        Position@ position = this.savedPosition();
-        if ( this.practicing && this.recalled )
-        {
-            if ( this.currentSector > position.currentSector && ent.moveType == MOVETYPE_PLAYER )
-            {
-                uint rows = this.practiceReport.numRows();
-                if ( rows > 0 )
-                {
-                    for ( uint i = 0; i < rows; i++ )
-                        G_PrintMsg( ent, this.practiceReport.getRow( i ) + "\n" );
-                    G_PrintMsg( ent, S_COLOR_CYAN + "Practice run cancelled\n" );
-                }
-            }
-            else if ( ent.moveType == MOVETYPE_NONE && this.lerpTo.saved )
-            {
-                this.applyPosition( this.lerpTo );
-                this.lerpFrom.saved = false;
-                this.lerpTo.saved = false;
-            }
-            this.autoRecallStart = this.positionCycle;
-        }
-        this.recalled = false;
-
-        this.practiceReport.reset();
-        this.run.clearTimes();
-
-        this.inRace = false;
-        this.postRace = false;
     }
 
     void scheduleRespawn()
     {
         this.forceRespawn = levelTime + 5000;
-    }
-
-    void updateMaxSpeed()
-    {
-        if ( this.inRace )
-            this.run.observeSpeed( this.getSpeed() );
     }
 
     Table@ activeReport()
@@ -878,7 +739,6 @@ class Player
         this.recalled = false;
         G_CenterPrintMsg( this.client.getEnt(), S_COLOR_CYAN + "Entered practice mode" );
 
-        this.cancelRace();
         this.setQuickMenu();
         this.updateHelpMessage();
     }
@@ -894,7 +754,6 @@ class Player
         if ( !this.practicing )
             return;
 
-        this.cancelRace();
         this.practicing = false;
         this.release = 0;
         G_CenterPrintMsg( this.client.getEnt(), S_COLOR_CYAN + "Left practice mode" );
