@@ -27,6 +27,9 @@ Vec3 Centre( Entity@ ent )
     return ent.origin + 0.5 * mins + 0.5 * maxs;
 }
 
+Cvar g_enforce_map_pool( "g_enforce_map_pool", "1", 0 );
+Cvar g_map_pool( "g_map_pool", "", 0 );
+
 String[] GetMapsByPattern( String@ pattern, String@ ignore = null )
 {
     String[] maps;
@@ -35,19 +38,42 @@ String[] GetMapsByPattern( String@ pattern, String@ ignore = null )
     pattern = pattern.removeColorTokens().tolower();
     if ( pattern == "*" )
         pattern = "";
-    
-    uint i = 0;
-    while( true )
+
+    if ( g_enforce_map_pool.string == "1" && g_map_pool.string.length() >= 2 )
     {
-        @map = ML_GetMapByNum( i++ );
-        if ( @map == null )
-            break;
-        String clean_map = map.removeColorTokens().tolower();
-        if ( @ignore != null && map == ignore )
-            continue;
-        if ( PatternMatch( clean_map, pattern, Wildcard_Yes ) )
+        String ss = g_map_pool.string;
+
+        // split by space
+        String@[] poolmaps = StringUtils::Split(ss, " ");
+        for ( uint i = 0; i < poolmaps.length; i++ )
         {
-            maps.insertLast( map );
+            String ipoolmap = poolmaps[i];
+
+            String clean_map = ipoolmap.removeColorTokens().tolower();
+
+            if ( @ignore != null && ipoolmap == ignore )
+                continue;
+            if ( PatternMatch( clean_map, pattern, Wildcard_Yes ) )
+            {
+                maps.insertLast( ipoolmap );
+            }
+        }
+    }
+    else
+    {
+        uint i = 0;
+        while( true )
+        {
+            @map = ML_GetMapByNum( i++ );
+            if ( @map == null )
+                break;
+            String clean_map = map.removeColorTokens().tolower();
+            if ( @ignore != null && map == ignore )
+                continue;
+            if ( PatternMatch( clean_map, pattern, Wildcard_Yes ) )
+            {
+                maps.insertLast( map );
+            }
         }
     }
 
