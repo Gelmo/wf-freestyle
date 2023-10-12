@@ -552,12 +552,6 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     return true;
 }
 
-bool Cmd_Rules( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    RACE_ShowRules(client, 0);
-    return true;
-}
-
 bool Cmd_Mark( Client@ client, const String &cmdString, const String &argsString, int argc )
 {
     return RACE_GetPlayer( client ).setMarker( argsString.getToken( 0 ) );
@@ -591,8 +585,6 @@ bool RACE_HandleCommand( Client@ client, const String &cmdString, const String &
         return Cmd_PreRandmap( client, cmdString, argsString, argc );
     else if ( cmdString == "help" )
         return Cmd_Help( client, cmdString, argsString, argc );
-    else if ( cmdString == "rules")
-        return Cmd_Rules( client, cmdString, argsString, argc );
     else if ( cmdString == "mark" )
         return Cmd_Mark( client, cmdString, argsString, argc );
 
@@ -615,6 +607,5 @@ void RACE_RegisterCommands()
     G_RegisterCommand( "maplist" );
     G_RegisterCommand( "prerandmap" );
     G_RegisterCommand( "help" );
-    G_RegisterCommand( "rules" );
     G_RegisterCommand( "mark" );
 }

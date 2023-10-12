@@ -21,7 +21,6 @@ Vec3 playerMins( -16.0, -16.0, -24.0 );
 Vec3 playerMaxs( 16.0, 16.0, 40.0 );
 
 Cvar race_servername( "race_servername", "server", CVAR_ARCHIVE );
-Cvar race_rulesFile( "race_rulesfile", "", CVAR_ARCHIVE );
 Cvar race_forceFiles( "race_forcefiles", "", CVAR_ARCHIVE );
 Cvar race_otherVersions( "race_otherversions", "", CVAR_ARCHIVE );
 
@@ -89,33 +88,15 @@ void RACE_SetUpMatch()
     G_RemoveDeadBodies();
 }
 
-uint[] rules_timestamp( maxClients );
-void RACE_ShowRules(Client@ client, int delay)
+uint[] intro_timestamp( maxClients );
+void RACE_IntroDelay(Client@ client, int delay)
 {
-    String filename = race_rulesFile.string;
-    if ( filename == "" )
-        return;
-
     if ( delay > 0 )
     {
-        rules_timestamp[client.playerNum] = levelTime + delay;
+        intro_timestamp[client.playerNum] = levelTime + delay;
         return;
     }
-    rules_timestamp[client.playerNum] = 0;
-
-    G_Print( "Showing rules to: " + client.name + "\n" );
-
-    String messages = G_LoadFile( filename );
-    int len = messages.length();
-    int i = 0;
-    while ( i < len )
-    {
-        int current = 0;
-        while ( i + current < len && messages.substr( i + current, 1 ) != "\n" )
-            current++;
-        client.printMessage( S_COLOR_WHITE + messages.substr( i, current ) + "\n" );
-        i += current + 1;
-    }
+    intro_timestamp[client.playerNum] = 0;
 }
 
 void RACE_ShowIntro(Client@ client)
@@ -219,7 +200,7 @@ void GT_ScoreEvent( Client@ client, const String &score_event, const String &arg
             RACE_GetPlayer( client ).clear();
         }
 
-        RACE_ShowRules(client, 2000);
+        RACE_IntroDelay(client, 2000);
     }
 }
 
@@ -261,10 +242,10 @@ void GT_ThinkRules()
         if ( client.state() < CS_SPAWNED )
             continue;
 
-        //delayed rules
-        if ( rules_timestamp[i] < levelTime && rules_timestamp[i] != 0 )
+        //delayed intro
+        if ( intro_timestamp[i] < levelTime && intro_timestamp[i] != 0 )
         {
-            RACE_ShowRules(client, 0);
+            RACE_IntroDelay(client, 0);
             RACE_ShowIntro(client);
         }
 
