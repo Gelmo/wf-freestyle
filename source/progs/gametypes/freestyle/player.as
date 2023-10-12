@@ -18,8 +18,6 @@ class Player
     Client@ client;
 
     int currentSector;
-    Table report( S_COLOR_ORANGE + "l " + S_COLOR_WHITE + "r " + S_COLOR_ORANGE + "/ l r " + S_COLOR_ORANGE + "/ l r " + S_COLOR_ORANGE + "/ l " + S_COLOR_WHITE + "r" + S_COLOR_ORANGE + "l r" );
-    Table practiceReport( S_COLOR_CYAN + "l " + S_COLOR_WHITE + "r " + S_COLOR_CYAN + "/ l r " + S_COLOR_CYAN + "/ l r " + S_COLOR_CYAN + "/ l " + S_COLOR_WHITE + "r" + S_COLOR_CYAN + "l r" );
 
     uint forceRespawn;
 
@@ -711,23 +709,6 @@ class Player
     void scheduleRespawn()
     {
         this.forceRespawn = levelTime + 5000;
-    }
-
-    Table@ activeReport()
-    {
-        if ( this.practicing )
-            return this.practiceReport;
-        else
-            return this.report;
-    }
-
-    void showReport()
-    {
-        Table@ report = this.activeReport();
-        Entity@ ent = this.client.getEnt();
-        uint rows = report.numRows();
-        for ( uint i = 0; i < rows; i++ )
-            G_PrintMsg( ent, report.getRow( i ) + "\n" );
     }
 
     void enterPracticeMode()
