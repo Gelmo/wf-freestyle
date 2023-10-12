@@ -31,7 +31,6 @@ enum Verbosity {
 };
 
 int numCheckpoints = 0;
-bool demoRecording = false;
 
 const float HITBOX_EPSILON = 0.01f;
 
@@ -321,21 +320,6 @@ void GT_ThinkRules()
 
     GENERIC_Think();
 
-    if ( match.getState() == MATCH_STATE_PLAYTIME )
-    {
-        // if there is no player in TEAM_PLAYERS finish the match and restart
-        if ( G_GetTeam( TEAM_PLAYERS ).numPlayers == 0 && demoRecording )
-        {
-            match.stopAutorecord();
-            demoRecording = false;
-        }
-        else if ( !demoRecording && G_GetTeam( TEAM_PLAYERS ).numPlayers > 0 )
-        {
-            match.startAutorecord();
-            demoRecording = true;
-        }
-    }
-
     // set all clients race stats
     Client@ client;
     Player@ player;
@@ -390,9 +374,6 @@ bool GT_MatchStateFinished( int incomingMatchState )
 {
     if ( incomingMatchState == MATCH_STATE_WAITEXIT )
     {
-        match.stopAutorecord();
-        demoRecording = false;
-
         // ch : also send rest of results
         RACE_WriteTopScores();
         RACE_UpdatePosValues();
@@ -704,8 +685,6 @@ void GT_InitGametype()
     defaultMsg = G_RegisterHelpMessage(" ");
 
     RACE_ForceFiles();
-
-    demoRecording = false;
 
     G_Print( "Gametype '" + gametype.title + "' initialized\n" );
 }
