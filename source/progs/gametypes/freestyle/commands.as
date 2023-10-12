@@ -467,7 +467,6 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     {
         client.printMessage( S_COLOR_YELLOW + "/position load [name]" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Teleports you to your saved position depending on which mode you are in." + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  Note: This command does not work during race." + "\n" );
     }
     else if ( command == "position" && subcommand == "list" )
     {
@@ -478,13 +477,11 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     {
         client.printMessage( S_COLOR_YELLOW + "/position find <start|finish|rl|gl|pg|push|door|button|tele|slick> [info]" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Teleports you to a matching entity." + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  Note: This command does not work during race." + "\n" );
     }
     else if ( command == "position" && subcommand == "join" )
     {
         client.printMessage( S_COLOR_YELLOW + "/position join <pattern>" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Teleports you to the player whose name matches pattern." + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  Note: This command does not work during race." + "\n" );
     }
     else if ( command == "position" && subcommand == "speed" )
     {

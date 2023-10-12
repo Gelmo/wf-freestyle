@@ -262,12 +262,6 @@ class Player
     bool loadPosition( String name, Verbosity verbosity )
     {
         Entity@ ent = this.client.getEnt();
-        if ( !this.practicing && this.client.team != TEAM_SPECTATOR && !this.preRace() )
-        {
-            if ( verbosity == Verbosity_Verbose )
-                G_PrintMsg( ent, "Position loading is not available during a race.\n" );
-            return false;
-        }
 
         this.noclipBackup.saved = false;
 
@@ -446,12 +440,6 @@ class Player
 
     bool clearPosition( String name )
     {
-        if ( !this.practicing && this.client.team != TEAM_SPECTATOR && !this.preRace() )
-        {
-            G_PrintMsg( this.client.getEnt(), "Position clearing is not available during a race.\n" );
-            return false;
-        }
-
         this.positionStore().remove( name );
         this.setQuickMenu();
 
@@ -964,12 +952,6 @@ class Player
         }
         else
         {
-            if ( !this.practicing && this.client.team != TEAM_SPECTATOR )
-            {
-                G_PrintMsg( ent, "Position loading is not available during a race.\n" );
-                return false;
-            }
-
             if ( entity == this.lastFind )
                 this.findIndex++;
             else
@@ -991,12 +973,6 @@ class Player
     bool joinPosition( String pattern )
     {
         Entity@ ent = this.client.getEnt();
-
-        if ( !this.practicing && this.client.team != TEAM_SPECTATOR )
-        {
-            G_PrintMsg( ent, "Position loading is not available during a race.\n" );
-            return false;
-        }
 
         Player@ match = this.oneMatchingPlayer( pattern );
         if ( @match == null )
