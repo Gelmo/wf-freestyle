@@ -20,9 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 Vec3 playerMins( -16.0, -16.0, -24.0 );
 Vec3 playerMaxs( 16.0, 16.0, 40.0 );
 
-Cvar race_servername( "race_servername", "server", CVAR_ARCHIVE );
 Cvar race_forceFiles( "race_forcefiles", "", CVAR_ARCHIVE );
-Cvar race_otherVersions( "race_otherversions", "", CVAR_ARCHIVE );
 
 enum Verbosity {
     Verbosity_Silent,
@@ -32,7 +30,7 @@ enum Verbosity {
 const float HITBOX_EPSILON = 0.01f;
 
 // msc: practicemode message
-uint practiceModeMsg, noclipModeMsg, recallModeMsg, prejumpMsg, defaultMsg;
+uint noclipModeMsg, recallModeMsg, defaultMsg;
 
 EntityFinder entityFinder;
 
@@ -513,10 +511,8 @@ void GT_InitGametype()
     G_RegisterCallvote( "randmap", "<* | pattern>", "string", "Changes to a random map" );
 
     // msc: practicemode message
-    practiceModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Practicing");
-    noclipModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Practicing - Noclip");
-    recallModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Practicing - Recall Mode");
-    prejumpMsg = G_RegisterHelpMessage(S_COLOR_RED + "Prejumping!");
+    noclipModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Noclip");
+    recallModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Recall Mode");
     defaultMsg = G_RegisterHelpMessage(" ");
 
     RACE_ForceFiles();

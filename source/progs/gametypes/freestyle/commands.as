@@ -459,9 +459,7 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     else if ( command == "position" && subcommand == "save" )
     {
         client.printMessage( S_COLOR_YELLOW + "/position save [name]" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Saves your position including your weapons as the new spawn position. You can save a separate" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  position for prerace and practicemode, depending on which mode you are in when using the command." + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  Note: Using this command during race will save your position for practicemode." + "\n" );
+        client.printMessage( S_COLOR_WHITE + "- Saves your position including your weapons as the new spawn position." + "\n" );
     }
     else if ( command == "position" && subcommand == "load" )
     {
@@ -487,7 +485,7 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     {
         client.printMessage( S_COLOR_YELLOW + "/position speed <value> [name]" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Example: /position speed 1000 - Sets your spawn speed to 1000." + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  Sets the speed at which you spawn in practicemode. This does not affect prerace speed. Prefix with + or - to change the speed relative to the currently set one." + "\n" );
+        client.printMessage( S_COLOR_WHITE + "  Sets the speed at which you spawn. Prefix with + or - to change the speed relative to the currently set one." + "\n" );
         client.printMessage( S_COLOR_WHITE + "  Use /position speed 0 to reset. Note: You don't get spawn speed while in noclip mode." + "\n" );
     }
     else if ( command == "position" && subcommand == "clear" )

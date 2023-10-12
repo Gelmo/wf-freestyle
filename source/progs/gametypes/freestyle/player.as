@@ -25,8 +25,7 @@ class Player
 
     bool practicing;
 
-    PositionStore preRacePositionStore;
-    PositionStore practicePositionStore;
+    PositionStore freestylePositionStore;
 
     bool noclipSpawn;
     int noclipWeapon;
@@ -75,11 +74,9 @@ class Player
         this.release = 0;
         this.practiceFinish = 0;
         this.positionCycle = 0;
-        this.nextRunPositionTime = 0;
         this.noclipSpawn = false;
 
-        this.practicePositionStore.clear();
-        this.preRacePositionStore.clear();
+        this.freestylePositionStore.clear();
         this.noclipBackup.clear();
         this.lastNoclipAction = 0;
         this.lerpFrom.saved = false;
@@ -116,11 +113,6 @@ class Player
         return "&p " + playerID + " " + ent.client.clanName + " " + ent.client.ping + " ";
     }
 
-    bool preRace()
-    {
-        return !this.practicing && this.client.team != TEAM_SPECTATOR && this.client.getEnt().health > 0;
-    }
-
     void setQuickMenu()
     {
         String s = '';
@@ -151,7 +143,7 @@ class Player
             s += menuItems[MI_ENTER_PRACTICE] +
                  menuItems[MI_EMPTY] +
                  menuItems[MI_SAVE_POSITION];
-            if ( position.saved && ( this.preRace() || this.client.team == TEAM_SPECTATOR ) )
+            if ( position.saved )
                 s += menuItems[MI_LOAD_POSITION] +
                      menuItems[MI_CLEAR_POSITION];
         }
@@ -218,10 +210,7 @@ class Player
 
     PositionStore@ positionStore()
     {
-        if ( this.preRace() )
-            return preRacePositionStore;
-        else
-            return practicePositionStore;
+            return freestylePositionStore;
     }
 
     Position@ savedPosition()
@@ -277,9 +266,7 @@ class Player
 
         this.applyPosition( position );
 
-        if ( this.preRace() )
-            ent.set_velocity( Vec3() );
-        else if ( this.practicing && position.recalled )
+        if ( this.practicing && position.recalled )
         {
             this.recalled = true;
             this.autoRecallStart = this.positionCycle;
@@ -365,26 +352,6 @@ class Player
         {
             G_PrintMsg( ent, "You can only save your position while alive.\n" );
             return false;
-        }
-
-        if ( this.preRace() )
-        {
-            Vec3 mins, maxs;
-            ent.getSize( mins, maxs );
-            Vec3 down = ent.origin;
-            down.z -= 1;
-            Trace tr;
-            if ( !tr.doTrace( ent.origin, mins, maxs, down, ent.entNum, MASK_DEADSOLID ) )
-            {
-                G_PrintMsg( this.client.getEnt(), "You can only save your prerace position on solid ground.\n" );
-                return false;
-            }
-
-            if ( tr.doTrace( ent.origin, playerMins, playerMaxs, ent.origin, ent.entNum, MASK_DEADSOLID ) )
-            {
-                G_PrintMsg( this.client.getEnt(), "You can't save your prerace position where you cannot stand up.\n" );
-                return false;
-            }
         }
 
         PositionStore@ store = this.positionStore();
@@ -595,8 +562,6 @@ class Player
 
         this.setQuickMenu();
         this.updateHelpMessage();
-        if ( oldTeam != TEAM_PLAYERS && newTeam == TEAM_PLAYERS )
-            this.updatePos();
 
         Entity@ ent = this.client.getEnt();
 
@@ -646,7 +611,7 @@ class Player
         if ( ref.team == TEAM_SPECTATOR && ref.chaseActive && ref.chaseTarget != 0 )
             @ref = G_GetEntity( ref.chaseTarget ).client;
         Player@ refPlayer = RACE_GetPlayer( ref );
-        if ( refPlayer.practicing && ref.team != TEAM_SPECTATOR )
+        if ( ref.team != TEAM_SPECTATOR )
         {
             if ( refPlayer.recalled )
                 this.client.setHelpMessage( recallModeMsg );
@@ -655,17 +620,12 @@ class Player
                 if ( ref.getEnt().moveType == MOVETYPE_NOCLIP )
                     this.client.setHelpMessage( noclipModeMsg );
                 else
-                    this.client.setHelpMessage( practiceModeMsg );
+                    this.client.setHelpMessage( 0 );
             }
         }
         else
         {
-            if ( this.client.team == TEAM_SPECTATOR && this.client.getEnt().isGhosting() )
-                this.client.setHelpMessage( 0 );
-            else if ( refPlayer.preRace() && RS_QueryPjState( refPlayer.client.playerNum ) )
-                this.client.setHelpMessage( prejumpMsg );
-            else
-                this.client.setHelpMessage( defaultMsg );
+            this.client.setHelpMessage( 0 );
         }
     }
 
@@ -986,7 +946,7 @@ class Player
 
     bool positionSpeed( String speedStr, String name )
     {
-        Position@ position = this.practicePositionStore.get( name );
+        Position@ position = this.freestylePositionStore.get( name );
         if ( @position == null )
         {
             G_PrintMsg( this.client.getEnt(), "No such position set.\n" );
@@ -1171,11 +1131,4 @@ Player@[] RACE_MatchPlayers( String pattern )
             playerList.push_back( RACE_GetPlayer( client ) );
     }
     return playerList;
-}
-
-void RACE_UpdatePosValues()
-{
-    Team@ team = G_GetTeam( TEAM_PLAYERS );
-    for ( int i = 0; @team.ent( i ) != null; i++ )
-        RACE_GetPlayer( team.ent( i ).client ).updatePos();
 }
