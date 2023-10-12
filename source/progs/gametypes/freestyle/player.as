@@ -23,8 +23,6 @@ class Player
 
     int positionCycle;
 
-    bool practicing;
-
     PositionStore freestylePositionStore;
 
     bool noclipSpawn;
@@ -32,7 +30,6 @@ class Player
 
     bool recalled;
     Position noclipBackup;
-    uint practiceFinish;
 
     uint release;
     uint lastNoclipAction;
@@ -67,12 +64,10 @@ class Player
 
         this.currentSector = 0;
         this.forceRespawn = 0;
-        this.practicing = false;
         this.recalled = false;
         this.autoRecall = false;
         this.autoRecallStart = -1;
         this.release = 0;
-        this.practiceFinish = 0;
         this.positionCycle = 0;
         this.noclipSpawn = false;
 
@@ -119,34 +114,22 @@ class Player
         Position@ position = this.savedPosition();
 
         s += menuItems[MI_RESTART_RACE];
-        if ( this.practicing )
+
+        if ( this.client.team != TEAM_SPECTATOR )
         {
-            s += menuItems[MI_LEAVE_PRACTICE];
-            if ( this.client.team != TEAM_SPECTATOR )
-            {
-                if ( this.client.getEnt().moveType == MOVETYPE_NOCLIP )
-                    s += menuItems[MI_NOCLIP_OFF];
-                else
-                    s += menuItems[MI_NOCLIP_ON];
-            }
+            if ( this.client.getEnt().moveType == MOVETYPE_NOCLIP )
+                s += menuItems[MI_NOCLIP_OFF];
             else
-            {
-                s += menuItems[MI_EMPTY];
-            }
-            s += menuItems[MI_SAVE_POSITION];
-            if ( position.saved )
-                s += menuItems[MI_LOAD_POSITION] +
-                     menuItems[MI_CLEAR_POSITION];
+                s += menuItems[MI_NOCLIP_ON];
         }
         else
         {
-            s += menuItems[MI_ENTER_PRACTICE] +
-                 menuItems[MI_EMPTY] +
-                 menuItems[MI_SAVE_POSITION];
-            if ( position.saved )
-                s += menuItems[MI_LOAD_POSITION] +
-                     menuItems[MI_CLEAR_POSITION];
+            s += menuItems[MI_EMPTY];
         }
+        s += menuItems[MI_SAVE_POSITION];
+        if ( position.saved )
+            s += menuItems[MI_LOAD_POSITION] +
+                 menuItems[MI_CLEAR_POSITION];
 
         GENERIC_SetQuickMenu( this.client, s );
     }
@@ -174,8 +157,6 @@ class Player
             ent.angles = angles;
             return true;
         }
-        if ( !this.practicing )
-            this.enterPracticeMode();
 
         if ( ent.moveType == MOVETYPE_PLAYER )
         {
@@ -266,12 +247,12 @@ class Player
 
         this.applyPosition( position );
 
-        if ( this.practicing && position.recalled )
+        if ( position.recalled )
         {
             this.recalled = true;
             this.autoRecallStart = this.positionCycle;
         }
-        else if ( this.practicing )
+        else
             this.recalled = false;
 
         if ( name != "" )
@@ -285,9 +266,9 @@ class Player
     bool recallPosition( int offset )
     {
         Entity@ ent = this.client.getEnt();
-        if ( !this.practicing || this.client.team == TEAM_SPECTATOR )
+        if ( this.client.team == TEAM_SPECTATOR )
         {
-            G_PrintMsg( ent, "Position recall is only available in practice mode.\n" );
+            G_PrintMsg( ent, "Position recall is not available in spectator mode.\n" );
             return false;
         }
 
@@ -439,7 +420,7 @@ class Player
     {
         Entity@ ent = this.client.getEnt();
 
-        if ( !this.practicing || this.client.team == TEAM_SPECTATOR || ( ent.moveType != MOVETYPE_NOCLIP && ent.moveType != MOVETYPE_NONE ) || this.release > 0 || ent.health <= 0 )
+        if ( this.client.team == TEAM_SPECTATOR || ( ent.moveType != MOVETYPE_NOCLIP && ent.moveType != MOVETYPE_NONE ) || this.release > 0 || ent.health <= 0 )
             return;
 
         uint keys = this.client.pressedKeys;
@@ -586,7 +567,6 @@ class Player
 
         if ( this.noclipSpawn )
         {
-            this.enterPracticeMode();
             this.recalled = false;
             ent.moveType = MOVETYPE_NOCLIP;
             ent.velocity = Vec3();
@@ -659,54 +639,17 @@ class Player
         this.forceRespawn = levelTime + 5000;
     }
 
-    void enterPracticeMode()
-    {
-        if ( this.practicing )
-            return;
-
-        this.practicing = true;
-        this.recalled = false;
-        G_CenterPrintMsg( this.client.getEnt(), S_COLOR_CYAN + "Entered practice mode" );
-
-        this.setQuickMenu();
-        this.updateHelpMessage();
-    }
-
     void respawn()
     {
         this.forceRespawn = 0;
         this.client.respawn( false );
     }
 
-    void leavePracticeMode()
-    {
-        if ( !this.practicing )
-            return;
-
-        this.practicing = false;
-        this.release = 0;
-        G_CenterPrintMsg( this.client.getEnt(), S_COLOR_CYAN + "Left practice mode" );
-        if ( this.client.team != TEAM_SPECTATOR )
-            this.respawn();
-        this.setQuickMenu();
-        this.updateHelpMessage();
-    }
-
-    void togglePracticeMode()
-    {
-        if ( pending_endmatch )
-            this.client.printMessage( "Can't join practicemode in overtime.\n" );
-        else if ( this.practicing )
-            this.leavePracticeMode();
-        else
-            this.enterPracticeMode();
-    }
-
     bool recallExit()
     {
-        if ( this.client.team == TEAM_SPECTATOR || !this.practicing )
+        if ( this.client.team == TEAM_SPECTATOR )
         {
-            G_PrintMsg( this.client.getEnt(), "Not available.\n" );
+            G_PrintMsg( this.client.getEnt(), "Not available in spectator mode.\n" );
             return false;
         }
 
@@ -779,12 +722,6 @@ class Player
 
     bool recallFake( uint time )
     {
-        if ( !this.practicing )
-        {
-            G_PrintMsg( this.client.getEnt(), "Only available in practicemode.\n" );
-            return false;
-        }
-
         Position@ position = this.savedPosition();
 
         if ( !position.saved )

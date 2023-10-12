@@ -159,7 +159,7 @@ bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &arg
     player.recalled = recalled;
 
     Entity@ ent = client.getEnt();
-    if ( player.practicing && ent.health > 0 && !ent.isGhosting() && client.team != TEAM_SPECTATOR )
+    if ( ent.health > 0 && !ent.isGhosting() && client.team != TEAM_SPECTATOR )
     {
         if ( ent.moveType == MOVETYPE_NONE )
             player.toggleNoclip();
@@ -196,12 +196,6 @@ bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &arg
         player.respawn();
     }
 
-    return true;
-}
-
-bool Cmd_Practicemode( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    RACE_GetPlayer( client ).togglePracticeMode();
     return true;
 }
 
@@ -380,11 +374,8 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
         cmdlist.addCell( "/kill /racerestart" );
         cmdlist.addCell( "Respawns you." );
 
-        cmdlist.addCell( "/practicemode" );
-        cmdlist.addCell( "Toggles between race and practicemode." );
-
         cmdlist.addCell( "/noclip" );
-        cmdlist.addCell( "Lets you move freely through the world whilst in practicemode." );
+        cmdlist.addCell( "Lets you move freely through the world." );
 
         cmdlist.addCell( "/position save [name]" );
         cmdlist.addCell( "Saves your position including your weapons as the new spawn position." );
@@ -402,10 +393,10 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
         cmdlist.addCell( "Teleports you to a player." );
 
         cmdlist.addCell( "/position speed" );
-        cmdlist.addCell( "Sets the speed at which you spawn in practicemode." );
+        cmdlist.addCell( "Sets the speed at which you spawn." );
 
         cmdlist.addCell( "/position recall" );
-        cmdlist.addCell( "Cycle through positions of your last run in practicemode." );
+        cmdlist.addCell( "Cycle through positions of your last run." );
 
         cmdlist.addCell( "/position clear [name]" );
         cmdlist.addCell( "Resets your weapons and spawn position to their defaults." );
@@ -443,18 +434,11 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
         client.printMessage( S_COLOR_YELLOW + "/kill /racerestart" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Respawns you. I mean srsly.. that's it." + "\n" );
     }
-    else if ( command == "practicemode" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/practicemode" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Toggles between race and practicemode. Race mode is the only mode in which your time will" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  be recorded. Practicemode is used to practice specific parts of the map. Some commands are" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  restricted to practicemode." + "\n" );
-    }
     else if ( command == "noclip" )
     {
         client.printMessage( S_COLOR_YELLOW + "/noclip" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Lets you move freely through the world whilst in practicemode. Use this command to get more" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  control over your position when using /position save. Only works in practicemode." + "\n" );
+        client.printMessage( S_COLOR_WHITE + "- Lets you move freely through the world. Use this command to get more" + "\n" );
+        client.printMessage( S_COLOR_WHITE + "  control over your position when using /position save." + "\n" );
     }
     else if ( command == "position" && subcommand == "save" )
     {
@@ -464,7 +448,7 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     else if ( command == "position" && subcommand == "load" )
     {
         client.printMessage( S_COLOR_YELLOW + "/position load [name]" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Teleports you to your saved position depending on which mode you are in." + "\n" );
+        client.printMessage( S_COLOR_WHITE + "- Teleports you to your saved position." + "\n" );
     }
     else if ( command == "position" && subcommand == "list" )
     {
@@ -506,7 +490,7 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
         client.printMessage( S_COLOR_YELLOW + "/position recall <start|end>" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Moves to the first or last recalled position." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall extend" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Toggles automatically extending recall runs and enabling the start timer in practicemode." + "\n" );
+        client.printMessage( S_COLOR_WHITE + "- Toggles automatically extending recall runs and enabling the start timer." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall cpX" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Moves to the first position past checkpoint X." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall <rl|pg|gl>" + "\n" );
@@ -571,8 +555,6 @@ bool RACE_HandleCommand( Client@ client, const String &cmdString, const String &
         return Cmd_PrivateMessage( client, cmdString, argsString, argc );
     else if ( cmdString == "racerestart" || cmdString == "kill" || cmdString == "join" )
         return Cmd_RaceRestart( client, cmdString, argsString, argc );
-    else if ( cmdString == "practicemode" )
-        return Cmd_Practicemode( client, cmdString, argsString, argc );
     else if ( cmdString == "noclip" )
         return Cmd_Noclip( client, cmdString, argsString, argc );
     else if ( cmdString == "position" )
@@ -599,7 +581,6 @@ void RACE_RegisterCommands()
     G_RegisterCommand( "racerestart" );
     G_RegisterCommand( "kill" );
     G_RegisterCommand( "join" );
-    G_RegisterCommand( "practicemode" );
     G_RegisterCommand( "noclip" );
     G_RegisterCommand( "position" );
     G_RegisterCommand( "maplist" );
