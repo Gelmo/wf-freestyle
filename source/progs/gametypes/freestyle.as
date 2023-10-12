@@ -230,6 +230,12 @@ void GT_ThinkRules()
 
     GENERIC_Think();
 
+    //Hook
+    for ( int i = 0; i < maxClients; i++ )
+    {
+        Hookers[i].Update(); 
+    }
+
     // set all clients race stats
     Client@ client;
     Player@ player;
@@ -452,8 +458,11 @@ void GT_InitGametype()
                  + "set g_countdown_time \"5\"\n"
                  + "set g_maxtimeouts \"0\" // -1 = unlimited\n"
                  + "set g_challengers_queue \"0\"\n"
+                 + "\n// gametype settings\n"
                  + "set g_noclass_inventory \"gb mg rg gl rl pg lg eb cells shells grens rockets plasma lasers bolts bullets\"\n"
                  + "set g_class_strong_ammo \"99 99 99 99 99 99 99 99\" // GB MG RG GL RL PG LG EB\n"
+                 + "set hook_enabled \"1\"\n"
+                 + "set hook_limit \"1\"\n"
                  + "\necho " + gametype.name + ".cfg executed\n";
 
         G_WriteFile( "configs/server/gametypes/" + gametype.name + ".cfg", config );
@@ -511,11 +520,19 @@ void GT_InitGametype()
 
     // add votes
     G_RegisterCallvote( "randmap", "<* | pattern>", "string", "Changes to a random map" );
+    G_RegisterCallvote( "hook_enabled", "<1 or 0>", "bool", "Enables or disables grappling hook usage" );
+    G_RegisterCallvote( "hook_limit", "<1 or 0>", "bool", "Enables or disables grappling hook speed limit" );
 
     // msc: practicemode message
     noclipModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Noclip");
     recallModeMsg = G_RegisterHelpMessage(S_COLOR_CYAN + "Recall Mode");
     defaultMsg = G_RegisterHelpMessage(" ");
+
+    for ( int i = 0; i < maxClients; i++ )
+    {
+        @Hookers[i].client = @G_GetClient(i);
+        @Hookers[i].player = @G_GetClient(i).getEnt();
+    }
 
     RACE_ForceFiles();
 

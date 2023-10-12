@@ -26,5 +26,6 @@ freestyle/positionstore.as;
 freestyle/quickmenu.as;
 freestyle/table.as;
 freestyle/entityfinder.as;
+freestyle/hook.as;
 
 freestyle.as;

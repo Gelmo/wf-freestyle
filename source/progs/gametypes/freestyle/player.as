@@ -597,6 +597,10 @@ class Player
                 this.client.selectWeapon( -1 ); // auto-select best weapon in the inventory
         }
 
+        // Disable active hook
+        int numPlayer = this.client.get_playerNum();
+        Hookers[ numPlayer ].isActive = false;
+
         this.loadPosition( "", Verbosity_Silent );
 
         if ( this.noclipSpawn )

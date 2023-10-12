@@ -58,6 +58,40 @@ bool Cmd_CallvoteValidate( Client@ client, const String &cmdString, const String
 
         randmap_time = levelTime;
     }
+    else if ( votename == "hook_enabled" )
+    {
+        String voteArg = argsString.getToken( 1 );
+        if ( voteArg.len() < 1 )
+        {
+            client.printMessage( "Callvote " + votename + " requires at least one argument\n" );
+            return false;
+        }
+
+        int value = voteArg.toInt();
+        if ( value >= 0 )
+        {
+            return true;
+        }
+
+        return false;
+    }
+    else if ( votename == "hook_limit" )
+    {
+        String voteArg = argsString.getToken( 1 );
+        if ( voteArg.len() < 1 )
+        {
+            client.printMessage( "Callvote " + votename + " requires at least one argument\n" );
+            return false;
+        }
+
+        int value = voteArg.toInt();
+        if ( value >= 0 )
+        {
+            return true;
+        }
+
+        return false;
+    }
     else
     {
         client.printMessage( "Unknown callvote " + votename + "\n" );
@@ -70,11 +104,23 @@ bool Cmd_CallvoteValidate( Client@ client, const String &cmdString, const String
 bool Cmd_CallvotePassed( Client@ client, const String &cmdString, const String &argsString, int argc )
 {
     String votename = argsString.getToken( 0 );
+    String hook_arg = "hook_enabled ";
+    String hook_limit_arg = "hook_limit ";
 
     if ( votename == "randmap" )
     {
         randmap_passed = randmap;
         match.launchState( MATCH_STATE_POSTMATCH );
+    }
+    else if ( votename == "hook_enabled" )
+    {
+        hook_arg += argsString.getToken( 1 ).toInt();
+        G_CmdExecute (hook_arg);
+    }
+    else if ( votename == "hook_limit" )
+    {
+        hook_limit_arg += argsString.getToken( 1 ).toInt();
+        G_CmdExecute (hook_limit_arg);
     }
 
     return true;
@@ -567,6 +613,27 @@ bool RACE_HandleCommand( Client@ client, const String &cmdString, const String &
         return Cmd_Help( client, cmdString, argsString, argc );
     else if ( cmdString == "mark" )
         return Cmd_Mark( client, cmdString, argsString, argc );
+    else if ( cmdString == "+hook" )
+    {
+        int numPlayer = client.get_playerNum();
+        Vec3 fwd, _right, _up;
+        client.getEnt().angles.angleVectors(fwd, _right, _up);
+
+        Hookers[ numPlayer ].isActive = true;
+        Hookers[ numPlayer ].fwdTarget = fwd;
+
+        return true;
+    }
+    else if ( cmdString == "-hook" )
+    {
+        if ( client.getEnt().isGhosting() )
+            return false;
+
+        int numPlayer = client.get_playerNum();
+        Hookers[ numPlayer ].isActive = false;
+
+        return true;
+    }
 
     G_PrintMsg( null, "unknown: " + cmdString + "\n" );
 
@@ -587,4 +654,6 @@ void RACE_RegisterCommands()
     G_RegisterCommand( "prerandmap" );
     G_RegisterCommand( "help" );
     G_RegisterCommand( "mark" );
+    G_RegisterCommand( "+hook" );
+    G_RegisterCommand( "-hook" );
 }
