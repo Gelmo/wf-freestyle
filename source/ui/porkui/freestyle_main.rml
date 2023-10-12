@@ -1,14 +1,14 @@
 <rml>
 <head>
 	<title>home</title>
-	<link type="text/template" href="template_racemod.rml" />
-	<script src="as/racemod_hudoptions.as"></script>
+	<link type="text/template" href="template_freestyle.rml" />
+	<script src="as/freestyle_hudoptions.as"></script>
 	<script>
 		ElementFormControl@ hudClient;
 		ElementFormControl@ hudSpec;
 		Cvar cg_clientHUD( "cg_clientHUD", "default", ::CVAR_ARCHIVE );
 		Cvar cg_specHUD( "cg_specHUD", "default", ::CVAR_ARCHIVE );
-		Cvar racemod_seenintro( "racemod_seenintro", "0", ::CVAR_ARCHIVE | ::CVAR_USERINFO );
+		Cvar freestyle_seenintro( "freestyle_seenintro", "0", ::CVAR_ARCHIVE | ::CVAR_USERINFO );
 
 		void onPlayerLoad( Element@ body, Event@ evt )
 		{
@@ -167,11 +167,11 @@
 
 		void loadRecommended()
 		{
-			// game.exec( "exec configs/racemod_recommended.cfg silent\n" );
+			// game.exec( "exec configs/freestyle_recommended.cfg silent\n" );
 			// can't execute configs in pk3's ?
 
-			game.execAppend('seta cg_clientHUD "ale_racemod"\n');
-			game.execAppend('seta cg_specHUD "ale_racemod"\n');
+			game.execAppend('seta cg_clientHUD "ale_freestyle"\n');
+			game.execAppend('seta cg_specHUD "ale_freestyle"\n');
 
 			game.execAppend('seta cg_strafeHUD "1"\n');
 			game.execAppend('seta cg_showSpeed "1"\n');
@@ -180,31 +180,31 @@
 			game.execAppend('seta cg_raceGhosts "1"\n');
 			game.execAppend('seta cg_raceGhostsAlpha "0.5"\n');
 
-			game.execAppend("menu_open racemod_main ignore 1\n");
+			game.execAppend("menu_open freestyle_main ignore 1\n");
 			window.close();
 		}
 
 		bool CheckRead() {
-			if ( racemod_seenintro.boolean ) {
+			if ( freestyle_seenintro.boolean ) {
 				return true;
 			} else {
-				window.location = "racemod_intro.rml";
+				window.location = "freestyle_intro.rml";
 				return false;
 			}
 		}
 
 		void btn_help( Element@ self, Event@ evt )
 		{
-			window.location = "racemod_help.rml";
+			window.location = "freestyle_help.rml";
 		}
 	</script>
 </head>
-<body template="porkui_racemod" onload="$onPlayerLoad" onshow="$onPlayerShow">
+<body template="porkui_freestyle" onload="$onPlayerLoad" onshow="$onPlayerShow">
 	<div id="menu-ingame">
 		<button id="close-button" onclick="$onCloseButton" />
 
-		<h1>Racemod Options</h1>
-		<div id="menu-racemod">
+		<h1>Freestyle Options</h1>
+		<div id="menu-freestyle">
 			<div id="leftcolumn">
 				<tabset id="options-set">
 					<tab class="side-tab">Hud Options</tab>
@@ -257,7 +257,7 @@
 							<div class="title">Transparent players opacity</div>
 							<input cvar="cg_raceGhostsAlpha" class="slider" type="range" min="0" max="1" step="0.05" value="0" realtime="1"/>
 							<div class="title">I have seen the intro message</div>
-							<input cvar="racemod_seenintro" type="checkbox" realtime="1"/>
+							<input cvar="freestyle_seenintro" type="checkbox" realtime="1"/>
 						</optionsform>
 					</panel>
 				</tabset>

@@ -1,6 +1,6 @@
 bool Cmd_GametypeMenu( Client@ client, const String &cmdString, const String &argsString, int argc )
 {
-    client.execGameCommand( "meop racemod_main" );
+    client.execGameCommand( "meop freestyle_main" );
     return true;
 }
 

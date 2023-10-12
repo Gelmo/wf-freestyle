@@ -99,9 +99,9 @@ void RACE_IntroDelay(Client@ client, int delay)
 
 void RACE_ShowIntro(Client@ client)
 {
-    if ( client.getUserInfoKey("racemod_seenintro").toInt() == 0 )
+    if ( client.getUserInfoKey("freestyle_seenintro").toInt() == 0 )
     {
-        client.execGameCommand("meop racemod_main");
+        client.execGameCommand("meop freestyle_main");
     }
 }
 

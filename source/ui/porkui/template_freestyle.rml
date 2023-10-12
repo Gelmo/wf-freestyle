@@ -1,4 +1,4 @@
-<template name="porkui_racemod" content="modal-frame">
+<template name="porkui_freestyle" content="modal-frame">
 <head>
 	<title>game</title>
 	<link rel="stylesheet" type="text/css" href="css/html4.rcss" />
@@ -8,7 +8,7 @@
 	<link type="text/css" rel="stylesheet" href="css/modal_body.rcss" />
 	<link rel="stylesheet" type="text/css" href="css/modal.rcss" />
 	<link rel="stylesheet" type="text/css" href="css/profile.rcss" />
-	<link rel="stylesheet" type="text/css" href="css/racemod.rcss" />
+	<link rel="stylesheet" type="text/css" href="css/freestyle.rcss" />
 	<script src="as/base.as" />
 	<script src="as/animations.as" />
 	<script src="as/modal.as" />

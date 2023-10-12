@@ -1,10 +1,10 @@
 <rml>
 <head>
 	<title>home</title>
-	<link type="text/template" href="template_racemod.rml" />
-	<link rel="stylesheet" type="text/css" href="css/racemod_intro.rcss" />
+	<link type="text/template" href="template_freestyle.rml" />
+	<link rel="stylesheet" type="text/css" href="css/freestyle_intro.rcss" />
 	<script>
-		Cvar racemod_seenintro( "racemod_seenintro", "0", CVAR_ARCHIVE | CVAR_USERINFO );
+		Cvar freestyle_seenintro( "freestyle_seenintro", "0", CVAR_ARCHIVE | CVAR_USERINFO );
 		void onPlayerLoad( Element@ body, Event@ evt )
 		{
 			onTemplateLoad( body, evt );
@@ -42,26 +42,26 @@
 
 			if ( checked )
 			{
-				racemod_seenintro.set(1);
+				freestyle_seenintro.set(1);
 			}
 			
 			if ( recommended )
 			{
-				window.location = "racemod_main.rml?ignore=1&recommended=1";
+				window.location = "freestyle_main.rml?ignore=1&recommended=1";
 				return;
 			}
 
-			window.location = "racemod_main.rml?ignore=1";
+			window.location = "freestyle_main.rml?ignore=1";
 			return;
 		}
 	</script>
 </head>
-<body template="porkui_racemod" onload="$onPlayerLoad" onshow="$onPlayerShow">
+<body template="porkui_freestyle" onload="$onPlayerLoad" onshow="$onPlayerShow">
 	<div id="menu-ingame">
 		<button id="close-button" onclick="$onCloseButton" />
 
-		<h1>Welcome to Racemod</h1>
-		<div id="menu-racemod">
+		<h1>Welcome to Freestyle</h1>
+		<div id="menu-freestyle">
 			<div id="bla">
 				This mod has several improvements from vanilla race.<br/>
 				The following binds are more or less required for racing:
@@ -89,7 +89,7 @@
 					</optionsform>
 				</div>
 				<div id="rightcolumn">
-					Racemod has its own in-game menu that you can open using F6 or pressing Escape and clicking the "Race options" button.
+					Freestyle has its own in-game menu that you can open using F6 or pressing Escape and clicking the "Race options" button.
 				</div>
 			</div>
 			<hr class="nicehr"/><br />

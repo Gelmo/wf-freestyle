@@ -1,8 +1,8 @@
 <rml>
 <head>
 	<title>home</title>
-	<link type="text/template" href="template_racemod.rml" />
-	<link rel="stylesheet" type="text/css" href="css/racemod_help.rcss" />
+	<link type="text/template" href="template_freestyle.rml" />
+	<link rel="stylesheet" type="text/css" href="css/freestyle_help.rcss" />
 	<script>
 		void onPlayerLoad( Element@ body, Event@ evt )
 		{
@@ -36,12 +36,12 @@
 		}
 	</script>
 </head>
-<body template="porkui_racemod" onload="$onPlayerLoad" onshow="$onPlayerShow">
+<body template="porkui_freestyle" onload="$onPlayerLoad" onshow="$onPlayerShow">
 	<div id="menu-ingame">
 		<button id="close-button" onclick="$onCloseButton" />
 
-		<h1>Racemod Help</h1>
-		<div id="menu-racemod">
+		<h1>Freestyle Help</h1>
+		<div id="menu-freestyle">
 			<idiv id="help-topics" src="http://livesow.net/race/ui/help_pages/topics.php" nocache="1"></idiv>
 			<idiv id="help-description" nocache="1">
 				Select a topic on the left.
