@@ -608,9 +608,10 @@ float GT_VotePower( Client@ client, String& votename, bool voted, bool yes )
 
 void GT_InitGametype()
 {
-    gametype.title = "Race";
-    gametype.version = "1.02";
+    gametype.title = "Freestyle";
+    gametype.version = "1.0";
     gametype.author = "Warsow Development Team";
+    // Forked by Gelmo
 
     // if the gametype doesn't have a config file, create it
     if ( !G_FileExists( "configs/server/gametypes/" + gametype.name + ".cfg" ) )
