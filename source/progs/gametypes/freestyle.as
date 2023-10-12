@@ -30,13 +30,7 @@ enum Verbosity {
     Verbosity_Verbose,
 };
 
-int numCheckpoints = 0;
-
 const float HITBOX_EPSILON = 0.01f;
-
-// ch : MM
-const uint RECORD_SEND_INTERVAL = 5 * 60 * 1000; // 5 minutes
-uint lastRecordSent = 0;
 
 // msc: practicemode message
 uint practiceModeMsg, noclipModeMsg, recallModeMsg, prejumpMsg, defaultMsg;
@@ -69,9 +63,6 @@ void RACE_playerKilled( Entity@ target, Entity@ attacker, Entity@ inflicter )
     if ( @target == null || @target.client == null )
         return;
 
-    // for accuracy, reset scores.
-    target_score_init( target.client );
-
     RACE_GetPlayer( target.client ).cancelRace();
 }
 
@@ -98,9 +89,6 @@ void RACE_SetUpMatch()
     }
 
     G_RemoveDeadBodies();
-
-    // ch : clear last recordSentTime
-    lastRecordSent = levelTime;
 }
 
 uint[] rules_timestamp( maxClients );
@@ -182,58 +170,21 @@ String@ GT_ScoreboardMessage( uint maxlen )
     String entry;
     Team@ team;
     Player@ player;
-    Player@ best;
     int i;
-    uint minTime;
-    int minPos;
-    //int readyIcon;
 
     @team = G_GetTeam( TEAM_PLAYERS );
 
-    // &t = team tab, team tag, team score (doesn't apply), team ping (doesn't apply)
     entry = "&t " + int( TEAM_PLAYERS ) + " 0 " + team.ping + " ";
     if ( scoreboardMessage.length() + entry.length() < maxlen )
         scoreboardMessage += entry;
-
-    minTime = 0;
-    minPos = -1;
-
-    do
-    {
-        @best = null;
-
-        // find the next best time
-        for ( i = 0; @team.ent( i ) != null; i++ )
-        {
-            @player = RACE_GetPlayer( team.ent( i ).client );
-
-            if ( player.hasTime &&
-                    ( player.bestRun.finishTime > minTime || ( player.bestRun.finishTime == minTime && player.pos >= minPos ) ) &&
-                    ( @best == null || player.bestRun.finishTime < best.bestRun.finishTime || ( player.bestRun.finishTime == best.bestRun.finishTime && player.pos < best.pos ) ) )
-                @best = player;
-        }
-        if ( @best != null )
-        {
-            entry = best.scoreboardEntry();
-            if ( scoreboardMessage.length() + entry.length() < maxlen )
-                scoreboardMessage += entry;
-            minTime = best.bestRun.finishTime;
-            minPos = best.pos + 1;
-        }
-    }
-    while ( @best != null );
 
     // add players without time
     for ( i = 0; @team.ent( i ) != null; i++ )
     {
         @player = RACE_GetPlayer( team.ent( i ).client );
-
-        if ( !player.hasTime )
-        {
-            entry = player.scoreboardEntry();
-            if ( scoreboardMessage.length() + entry.length() < maxlen )
-                scoreboardMessage += entry;
-        }
+        entry = player.scoreboardEntry();
+        if ( scoreboardMessage.length() + entry.length() < maxlen )
+            scoreboardMessage += entry;
     }
 
     return scoreboardMessage;
@@ -268,20 +219,9 @@ void GT_ScoreEvent( Client@ client, const String &score_event, const String &arg
         if ( @client != null )
         {
             RACE_GetPlayer( client ).clear();
-            RACE_UpdateHUDTopScores();
         }
 
         RACE_ShowRules(client, 2000);
-
-        // ch : begin fetching records over interweb
-        // MM_FetchRaceRecords( client.getEnt() );
-
-        RACE_GetPlayer( client ).showMapStats();
-    }
-    else if ( score_event == "userinfochanged" )
-    {
-        if ( @client != null )
-            RACE_GetPlayer( client ).loadStoredTime();
     }
 }
 
@@ -356,12 +296,6 @@ void GT_ThinkRules()
 
         RACE_GetPlayer( client ).think();
     }
-
-    // ch : send intermediate results
-    if ( ( lastRecordSent + RECORD_SEND_INTERVAL ) >= levelTime )
-    {
-
-    }
 }
 
 bool pending_endmatch = false;
@@ -374,10 +308,6 @@ bool GT_MatchStateFinished( int incomingMatchState )
 {
     if ( incomingMatchState == MATCH_STATE_WAITEXIT )
     {
-        // ch : also send rest of results
-        RACE_WriteTopScores();
-        RACE_UpdatePosValues();
-
         G_CmdExecute("set g_inactivity_maxtime 90\n");
         G_CmdExecute("set g_disable_vote_remove 1\n");
 
@@ -396,8 +326,6 @@ bool GT_MatchStateFinished( int incomingMatchState )
             pending_endmatch = true;
             return false;
         }
-
-        lastRecords.toFile();
     }
 
     return true;
@@ -466,8 +394,6 @@ void GT_Shutdown()
 void GT_SpawnGametype()
 {
     Cvar cm_mapHeader("cm_mapHeader", "", 0);
-
-    //G_Print( "numCheckPoints: " + numCheckpoints + "\n" );
 
     //TODO: fix in source, /kill should reset touch timeouts.
     for ( int i = 0; i < numEntities; i++ )
@@ -548,38 +474,6 @@ void GT_SpawnGametype()
         else if ( ent.classname == "misc_teleporter_dest" || ent.classname == "target_teleporter" )
             entityFinder.add( "tele", ent, centre );
     }
-
-    // setup the checkpoints arrays sizes adjusted to numCheckPoints
-    for ( int i = 0; i < maxClients; i++ )
-        players[i].resizeCPs( numCheckpoints );
-
-    Cvar mapNameVar( "mapname", "", 0 );
-    RACE_LoadTopScores( levelRecords, mapNameVar.string.tolower(), numCheckpoints, "" );
-
-    for ( int i = 0; i < MAX_RECORDS; i++ )
-        otherVersionRecords[i].setupArrays( numCheckpoints );
-
-    String version = race_otherVersions.string.getToken( 0 );
-    for ( int i = 1; version != ""; i++ )
-    {
-        RACE_LoadTopScores( otherVersionRecords, mapNameVar.string.tolower(), numCheckpoints, version );
-        version = race_otherVersions.string.getToken( i );
-    }
-
-    RACE_UpdateHUDTopScores();
-
-    lastRecords.fromFile();
-}
-
-float GT_VotePower( Client@ client, String& votename, bool voted, bool yes )
-{
-    Player@ player = @RACE_GetPlayer(client);
-    if ( player.hasTime && voted && !yes )
-    {
-        return 2.0;
-    }
-
-    return 1.0;
 }
 
 // Important: This function is called before any entity is spawned, and
@@ -669,8 +563,8 @@ void GT_InitGametype()
         gametype.setTeamSpawnsystem( team, SPAWNSYSTEM_INSTANT, 0, 0, false );
 
     // define the scoreboard layout
-    G_ConfigString( CS_SCB_PLAYERTAB_LAYOUT, "%n 112 %s 52 %s 32 %t 80 %s 36 %s 48 %l 40 %s 48" );
-    G_ConfigString( CS_SCB_PLAYERTAB_TITLES, "Name Clan Pos Time Diff Speed Ping Racing" );
+    G_ConfigString( CS_SCB_PLAYERTAB_LAYOUT, "%n 112 %s 52 %l 40" );
+    G_ConfigString( CS_SCB_PLAYERTAB_TITLES, "Name Clan Ping" );
 
     RACE_RegisterCommands();
 

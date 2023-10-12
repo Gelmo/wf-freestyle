@@ -1,5 +1,3 @@
-Cvar race_toplists( "race_toplists", "", CVAR_ARCHIVE );
-
 bool Cmd_GametypeMenu( Client@ client, const String &cmdString, const String &argsString, int argc )
 {
     client.execGameCommand( "meop racemod_main" );
@@ -152,9 +150,6 @@ bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &arg
 {
     Player@ player = RACE_GetPlayer( client );
 
-    // for accuracy, reset scores.
-    target_score_init( client );
-
     if ( pending_endmatch || match.getState() >= MATCH_STATE_POSTMATCH )
     {
         if ( !( player.inRace || player.postRace ) )
@@ -240,10 +235,6 @@ bool Cmd_Position( Client@ client, const String &cmdString, const String &argsSt
         String option = argsString.getToken( 1 ).tolower();
         if ( option == "exit" )
             return player.recallExit();
-        else if ( option == "best" )
-            return player.recallBest( argsString.getToken( 2 ) );
-        else if ( option == "current" )
-            return player.recallCurrent( argsString.getToken( 2 ) );
         else if ( option == "fake" )
             return player.recallFake( argsString.getToken( 2 ).toInt() );
         else if ( option == "interval" )
@@ -287,89 +278,6 @@ bool Cmd_Position( Client@ client, const String &cmdString, const String &argsSt
         G_PrintMsg( client.getEnt(), "position <save | load | list | find | join | speed <value> | recall | clear>\n" );
         return false;
     }
-}
-
-void showTop( Client@ client, const String &mapName, bool full )
-{
-    RecordTime[]@ records;
-    if ( mapName == "" )
-    {
-        if ( full )
-        {
-            topRequestRecords = levelRecords;
-            @records = topRequestRecords;
-
-            for ( int i = 0; i < MAX_RECORDS && otherVersionRecords[i].saved; i++ )
-                RACE_AddTopScore( records, otherVersionRecords[i] );
-        }
-        else
-            @records = levelRecords;
-    }
-    else
-    {
-        @records = topRequestRecords;
-        RACE_LoadTopScores( records, mapName, 0, "" );
-    }
-
-    RecordTime@ top = records[0];
-    if ( !top.saved )
-    {
-        client.printMessage( S_COLOR_RED + "No records yet.\n" );
-    }
-    else
-    {
-        Table table( "r r r l ll" );
-        for ( int i = 0; i < DISPLAY_RECORDS; i++ )
-        {
-            RecordTime@ record = records[i];
-            if ( record.saved )
-            {
-                table.addCell( ( i + 1 ) + "." );
-                table.addCell( S_COLOR_GREEN + RACE_TimeToString( record.finishTime ) );
-                table.addCell( S_COLOR_YELLOW + "[+" + RACE_TimeToString( record.finishTime - top.finishTime ) + "]" );
-                table.addCell( S_COLOR_WHITE + record.playerName );
-                if ( record.login != "" )
-                    table.addCell( S_COLOR_WHITE + "(" + S_COLOR_YELLOW + record.login + S_COLOR_WHITE + ")" );
-                else
-                    table.addCell( "" );
-                if ( full )
-                    table.addCell( " " + S_COLOR_WHITE + record.version );
-                else
-                    table.addCell( "" );
-            }
-        }
-        uint rows = table.numRows();
-        for ( uint i = 0; i < rows; i++ )
-            client.printMessage( table.getRow( i ) + "\n" );
-    }
-}
-
-bool Cmd_Top( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    String mapName = argsString.getToken( 0 ).tolower().replace( "/", "" );
-    showTop( client, mapName, false );
-    return true;
-}
-
-bool Cmd_FullTop( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    showTop( client, "", true );
-    return true;
-}
-
-bool Cmd_CPs( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    return RACE_GetPlayer( client ).showCPs( argsString.getToken( 0 ), argsString.getToken( 1 ), false );
-}
-
-bool Cmd_CPsFull( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    return RACE_GetPlayer( client ).showCPs( argsString.getToken( 0 ), argsString.getToken( 1 ), true );
-}
-
-bool Cmd_LastRecs( Client@ client, const String &cmdString, const String &argsString, int argc )
-{
-    return lastRecords.show( client.getEnt() );
 }
 
 const uint MAPS_PER_PAGE = 30;
@@ -459,9 +367,6 @@ bool Cmd_PreRandmap( Client@ client, const String &cmdString, const String &args
     if ( result == "" )
         return false;
 
-    client.printMessage( S_COLOR_YELLOW + "Showing top for " + S_COLOR_WHITE + result + "\n" );
-    showTop( client, result.tolower(), false );
-
     client.printMessage( S_COLOR_YELLOW + "Chosen map: " + S_COLOR_WHITE + result + S_COLOR_YELLOW + " (out of " + S_COLOR_WHITE + player.randmapMatches + S_COLOR_YELLOW + " matches)\n" );
     return true;
 }
@@ -506,18 +411,6 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
 
         cmdlist.addCell( "/position clear [name]" );
         cmdlist.addCell( "Resets your weapons and spawn position to their defaults." );
-
-        cmdlist.addCell( "/top" );
-        cmdlist.addCell( "Shows the top record times for the current map." );
-
-        cmdlist.addCell( "/topfull" );
-        cmdlist.addCell( "Shows the top record times for the current map, including records from previous versions." );
-
-        cmdlist.addCell( "/cps" );
-        cmdlist.addCell( "Shows your times between checkpoints for the current map." );
-
-        cmdlist.addCell( "/lastrecs" );
-        cmdlist.addCell( "Shows the last records made on previous recent maps." );
 
         cmdlist.addCell( "/m" );
         cmdlist.addCell( "Lets you send a private message." );
@@ -611,10 +504,6 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     {
         client.printMessage( S_COLOR_YELLOW + "/position recall exit" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Leave recall mode." + "\n" );
-        client.printMessage( S_COLOR_YELLOW + "/position recall best [player]" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Loads positions from your best run, or a matching player." + "\n" );
-        client.printMessage( S_COLOR_YELLOW + "/position recall current <player>" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Loads current positions from a matching player." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall fake [time]" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Makes the currently saved position a recall position with timestamp time in ms, 0 by default." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall interval [interval]" + "\n" );
@@ -631,39 +520,6 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
         client.printMessage( S_COLOR_WHITE + "- Moves to the first position with the given weapon." + "\n" );
         client.printMessage( S_COLOR_YELLOW + "/position recall <offset>" + "\n" );
         client.printMessage( S_COLOR_WHITE + "- Cycles through automatically saved positions from your previous run." + "\n" );
-    }
-    else if ( command == "top" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/top" + " [mapname]\n" );
-        client.printMessage( S_COLOR_WHITE + "- Shows a list of the top record times for the current/provided map along with the names and time" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  difference compared to the number 1 time." + "\n" );
-        if ( race_toplists.string != "" )
-            client.printMessage( S_COLOR_WHITE + "  To see all lists visit: " + race_toplists.string + "." + "\n" );
-    }
-    else if ( command == "topfull" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/topfull" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Shows a list of the top record times for the current map along with the names and time" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  difference compared to the number 1 time, including times from other game versions." + "\n" );
-    }
-    else if ( command == "cps" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/cps [target pattern] [reference pattern]" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Shows your times between checkpoints on the current map and compares to the best recorded times" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  of players matching target pattern. If a reference pattern is given, the result is shown relative" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  to the matching player from the top list instead of you." + "\n" );
-    }
-    else if ( command == "cpsfull" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/cpsfull [target pattern] [reference pattern]" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Shows your times between checkpoints on the current map and compares to the best recorded times from /topfull" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  of players matching target pattern. If a reference pattern is given, the result is shown relative" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "  to the matching player from the top list instead of you." + "\n" );
-    }
-    else if ( command == "lastrecs" )
-    {
-        client.printMessage( S_COLOR_YELLOW + "/lastrecs" + "\n" );
-        client.printMessage( S_COLOR_WHITE + "- Shows a list of records made on previous recently played maps." + "\n" );
     }
     else if ( command == "maplist" )
     {
@@ -734,16 +590,6 @@ bool RACE_HandleCommand( Client@ client, const String &cmdString, const String &
         return Cmd_Noclip( client, cmdString, argsString, argc );
     else if ( cmdString == "position" )
         return Cmd_Position( client, cmdString, argsString, argc );
-    else if ( cmdString == "top" )
-        return Cmd_Top( client, cmdString, argsString, argc );
-    else if ( cmdString == "topfull" )
-        return Cmd_FullTop( client, cmdString, argsString, argc );
-    else if ( cmdString == "cps" )
-        return Cmd_CPs( client, cmdString, argsString, argc );
-    else if ( cmdString == "cpsfull" )
-        return Cmd_CPsFull( client, cmdString, argsString, argc );
-    else if ( cmdString == "lastrecs" )
-        return Cmd_LastRecs( client, cmdString, argsString, argc );
     else if ( cmdString == "maplist" )
         return Cmd_Maplist( client, cmdString, argsString, argc );
     else if ( cmdString == "prerandmap" )
@@ -771,11 +617,6 @@ void RACE_RegisterCommands()
     G_RegisterCommand( "practicemode" );
     G_RegisterCommand( "noclip" );
     G_RegisterCommand( "position" );
-    G_RegisterCommand( "top" );
-    G_RegisterCommand( "topfull" );
-    G_RegisterCommand( "cps" );
-    G_RegisterCommand( "cpsfull" );
-    G_RegisterCommand( "lastrecs" );
     G_RegisterCommand( "maplist" );
     G_RegisterCommand( "prerandmap" );
     G_RegisterCommand( "help" );
