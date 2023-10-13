@@ -334,6 +334,20 @@ void GT_Shutdown()
 {
 }
 
+// Temporary fix for hang from msc - https://github.com/DenMSC/racemod_2.1/commit/e073bed71de7f78b2a3d7dfeb8e1472e1d91442c
+void target_relay_fix_use( Entity @self, Entity @other, Entity @activator )
+{
+    if ( ( self.spawnFlags & 4 ) != 0 )
+    {
+        array<Entity @> targets = self.findTargets();
+        Entity @target = targets[ rand() % targets.length ];
+        if( @target != null )
+            __G_CallUse( target, self, activator );
+        return;
+    }
+    self.useTargets( activator );
+}
+
 // The map entities have just been spawned. The level is initialized for
 // playing, but nothing has yet started.
 void GT_SpawnGametype()
@@ -345,10 +359,18 @@ void GT_SpawnGametype()
     {
         Entity@ ent = G_GetEntity(i);
 
-        if ( ent.classname == "target_teleporter" ) {
-            if( cm_mapHeader.string != "FBSP" && ( ent.spawnFlags & 1 ) != 0 ) {
+        // Temporary fix for hang from msc - https://github.com/DenMSC/racemod_2.1/commit/e073bed71de7f78b2a3d7dfeb8e1472e1d91442c
+        if ( ent.classname == "target_relay" )
+        {
+            ent.freeEntity();
+            Entity @new = G_SpawnEntity( "target_relay_fix" );
+            @new.use = target_relay_fix_use;
+        }
+
+        if ( ent.classname == "target_teleporter" )
+        {
+            if ( cm_mapHeader.string != "FBSP" && ( ent.spawnFlags & 1 ) != 0 )
                 ent.spawnFlags = ent.spawnFlags & ~1;
-            }
         }
 
         Vec3 centre = Centre( ent );
