@@ -108,7 +108,7 @@ class Player
         Entity@ ent = this.client.getEnt();
         int playerID = ( ent.isGhosting() && ( match.getState() == MATCH_STATE_PLAYTIME ) ) ? -( ent.playerNum + 1 ) : ent.playerNum;
 
-        return "&p " + playerID + " " + ent.client.clanName + " " + ent.client.ping + " ";
+        return "&p " + playerID + " " + playerID + " " + ent.client.clanName + " " + ent.client.ping + " ";
     }
 
     void setQuickMenu()
@@ -377,7 +377,7 @@ class Player
     {
         Entity@ ent = this.client.getEnt();
         PositionStore@ store = this.positionStore();
-        for ( uint i = 0; i < store.positions.length; i++ )
+        for ( uint i = 0; i < store.positions.length(); i++ )
         {
             if( store.positions[i].saved )
             {
@@ -876,10 +876,10 @@ class Player
                         G_PrintMsg( ent, "    maxHealth: " + current.maxHealth + "\n" );
                     }
                     array<Entity@>@ targeting = current.findTargeting();
-                    for ( uint i = 0; i < targeting.length; i++ )
+                    for ( uint i = 0; i < targeting.length(); i++ )
                         G_PrintMsg( ent, "    targetted by " + targeting[i].entNum + ": " + targeting[i].classname + "\n" );
                     array<Entity@>@ targets = current.findTargets();
-                    for ( uint i = 0; i < targets.length; i++ )
+                    for ( uint i = 0; i < targets.length(); i++ )
                         G_PrintMsg( ent, "    target " + targets[i].entNum + ": " + targets[i].classname + "\n" );
                 }
                 @list = list.drop( 1 );
