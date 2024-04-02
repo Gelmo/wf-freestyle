@@ -68,7 +68,7 @@ class EntityFinder
         if( @ignore == null )
             @ignore = array<Entity@>();
 
-        for( uint i = 0; i < ignore.length; i++ )
+        for( uint i = 0; i < ignore.length(); i++ )
         {
             if( ignore[i].entNum == ent.entNum )
                 return false;
@@ -76,7 +76,7 @@ class EntityFinder
 
         bool result = false;
         array<Entity@>@ targeting = ent.findTargeting();
-        if( ent.classname == "trigger_multiple" || ent.classname == "info_player_deathmatch" || ent.classname == "func_door" || ent.classname == "func_door_rotating" || ( addUntargeted && targeting.length == 0 ) )
+        if( ent.classname == "trigger_multiple" || ent.classname == "info_player_deathmatch" || ent.classname == "func_door" || ent.classname == "func_door_rotating" || ( addUntargeted && targeting.length() == 0 ) )
         {
             if( resetWait )
                 ent.wait = 0;
@@ -85,7 +85,7 @@ class EntityFinder
         }
 
         ignore.push_back( ent );
-        for( uint i = 0; i < targeting.length; i++ )
+        for( uint i = 0; i < targeting.length(); i++ )
             result = result || this.addTriggering( type, targeting[i], false, resetWait, ignore );
         ignore.pop_back();
 

@@ -45,7 +45,7 @@ String[] GetMapsByPattern( String@ pattern, String@ ignore = null )
 
         // split by space
         String@[] poolmaps = StringUtils::Split(ss, " ");
-        for ( uint i = 0; i < poolmaps.length; i++ )
+        for ( uint i = 0; i < poolmaps.length(); i++ )
         {
             String ipoolmap = poolmaps[i];
 
