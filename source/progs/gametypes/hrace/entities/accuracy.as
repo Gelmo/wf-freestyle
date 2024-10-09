@@ -71,7 +71,7 @@ class TargetScore
   bool findTargetingSpawnpoint(Entity@ ent)
   {
     Entity@[] targeting = ent.findTargeting();
-    for ( uint i = 0; i < targeting.length; i++ )
+    for ( uint i = 0; i < targeting.length(); i++ )
     {
       if ( targeting[i].classname.tolower().substr(0,12) == "info_player_" )
       {
@@ -94,7 +94,7 @@ void target_score( Entity @ent )
 
 void target_score_use( Entity @ent, Entity @other, Entity @activator )
 {
-  for ( uint i = 0; i < target_score_ents.length; i++ )
+  for ( uint i = 0; i < target_score_ents.length(); i++ )
   {
     if ( @target_score_ents[i].ent == @ent )
     {
@@ -105,7 +105,7 @@ void target_score_use( Entity @ent, Entity @other, Entity @activator )
 
 void target_score_setup( Entity @ent )
 {
-  for ( uint i = 0; i < target_score_ents.length; i++ )
+  for ( uint i = 0; i < target_score_ents.length(); i++ )
   {
     if ( @target_score_ents[i].ent == @ent )
     {
@@ -117,7 +117,7 @@ void target_score_setup( Entity @ent )
 void target_score_init( Client@ client )
 {
   target_score_scores[client.playerNum] = 0;
-  for ( uint i = 0; i < target_score_ents.length; i++ )
+  for ( uint i = 0; i < target_score_ents.length(); i++ )
   {
     target_score_ents[i].touched[client.playerNum] = false;
   }
@@ -198,7 +198,7 @@ class TargetFragsFilter
   bool findTargetingTrigger(Entity@ ent)
   {
     Entity@[] targeting = ent.findTargeting();
-    for ( uint i = 0; i < targeting.length; i++ )
+    for ( uint i = 0; i < targeting.length(); i++ )
     {
       if ( targeting[i].solid == SOLID_TRIGGER )
       {
@@ -286,7 +286,7 @@ void target_fragsFilter( Entity @ent )
 
 void target_fragsFilter_use( Entity @ent, Entity @other, Entity @activator )
 {
-  for ( uint i = 0; i < target_fragsFilter_ents.length; i++ )
+  for ( uint i = 0; i < target_fragsFilter_ents.length(); i++ )
   {
     if ( @target_fragsFilter_ents[i].ent == @ent )
     {
@@ -297,7 +297,7 @@ void target_fragsFilter_use( Entity @ent, Entity @other, Entity @activator )
 
 void target_fragsFilter_setup( Entity @ent )
 {
-  for ( uint i = 0; i < target_fragsFilter_ents.length; i++ )
+  for ( uint i = 0; i < target_fragsFilter_ents.length(); i++ )
   {
     if ( @target_fragsFilter_ents[i].ent == @ent )
     {
@@ -308,7 +308,7 @@ void target_fragsFilter_setup( Entity @ent )
 
 void target_fragsFilter_think( Entity @ent )
 {
-  for ( uint i = 0; i < target_fragsFilter_ents.length; i++ )
+  for ( uint i = 0; i < target_fragsFilter_ents.length(); i++ )
   {
     if ( @target_fragsFilter_ents[i].ent == @ent )
     {

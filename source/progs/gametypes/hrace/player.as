@@ -545,7 +545,7 @@ class Player
     {
         Entity@ ent = this.client.getEnt();
         PositionStore@ store = this.positionStore();
-        for ( uint i = 0; i < store.positions.length; i++ )
+        for ( uint i = 0; i < store.positions.length(); i++ )
         {
             if( store.positions[i].saved )
             {
@@ -1050,7 +1050,7 @@ class Player
         this.showReport();
 
         Client@[] specs = RACE_GetSpectators( this.client );
-        for ( uint i = 0; i < specs.length; i++ )
+        for ( uint i = 0; i < specs.length(); i++ )
         {
             Player@ specPlayer = @RACE_GetPlayer( specs[i] );
             specPlayer.showChaseeTime( this.run.finishTime, this.bestRun.finishTime, specPlayer.bestRun.finishTime, levelRecords[0].finishTime );
@@ -1238,7 +1238,7 @@ class Player
         G_AnnouncerSound( this.client, G_SoundIndex( "sounds/misc/timer_bip_bip" ), GS_MAX_TEAMS, false, null );
 
         Client@[] specs = RACE_GetSpectators( this.client );
-        for ( uint i = 0; i < specs.length; i++ )
+        for ( uint i = 0; i < specs.length(); i++ )
         {
             Player@ specPlayer = @RACE_GetPlayer( specs[i] );
             specPlayer.showChaseeTime( time, this.bestRun.cpTimes[id], specPlayer.bestRun.cpTimes[id], levelRecords[0].cpTimes[id] );
@@ -1661,10 +1661,10 @@ class Player
                         G_PrintMsg( ent, "    maxHealth: " + current.maxHealth + "\n" );
                     }
                     array<Entity@>@ targeting = current.findTargeting();
-                    for ( uint i = 0; i < targeting.length; i++ )
+                    for ( uint i = 0; i < targeting.length(); i++ )
                         G_PrintMsg( ent, "    targetted by " + targeting[i].entNum + ": " + targeting[i].classname + "\n" );
                     array<Entity@>@ targets = current.findTargets();
-                    for ( uint i = 0; i < targets.length; i++ )
+                    for ( uint i = 0; i < targets.length(); i++ )
                         G_PrintMsg( ent, "    target " + targets[i].entNum + ": " + targets[i].classname + "\n" );
                 }
                 @list = list.drop( 1 );

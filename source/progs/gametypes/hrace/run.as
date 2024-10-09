@@ -37,7 +37,7 @@ class Run
 
     void clearCPs()
     {
-        for ( uint i = 0; i < this.cpTimes.length; i++ )
+        for ( uint i = 0; i < this.cpTimes.length(); i++ )
         {
             this.cpTimes[i] = 0;
             this.cpOrder[i] = -1;
@@ -46,7 +46,7 @@ class Run
 
     void resizeCPs( uint size )
     {
-        if ( this.cpTimes.length != size )
+        if ( this.cpTimes.length() != size )
         {
             this.cpTimes.resize( size );
             this.cpOrder.resize( size );
@@ -57,7 +57,7 @@ class Run
 
     void copy( Run@ other )
     {
-        for ( uint i = 0; i < this.cpTimes.length; i++ )
+        for ( uint i = 0; i < this.cpTimes.length(); i++ )
         {
             this.cpTimes[i] = other.cpTimes[i];
             this.cpOrder[i] = other.cpOrder[i];
@@ -96,7 +96,7 @@ class Run
     {
         if ( this.cpTimes[id] != 0 )
             return true;
-        for ( uint i = 0; i < this.cpOrder.length; i++ )
+        for ( uint i = 0; i < this.cpOrder.length(); i++ )
         {
             if ( this.cpOrder[i] == id )
                 return true;
