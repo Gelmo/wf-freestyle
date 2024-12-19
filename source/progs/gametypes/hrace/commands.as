@@ -1,12 +1,12 @@
 Cvar race_toplists( "race_toplists", "", CVAR_ARCHIVE );
 
-bool Cmd_GametypeMenu( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_GametypeMenu( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     client.execGameCommand( "meop racemod_main" );
     return true;
 }
 
-bool Cmd_Gametype( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Gametype( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String response = "";
     Cvar fs_game( "fs_game", "", 0 );
@@ -24,7 +24,7 @@ bool Cmd_Gametype( Client@ client, const String &cmdString, const String &argsSt
     return true;
 }
 
-bool Cmd_CvarInfo( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_CvarInfo( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     GENERIC_CheatVarResponse( client, cmdString, argsString, argc );
     return true;
@@ -37,7 +37,7 @@ uint randmap_time = 0;
 const uint RANDMAP_DELAY_MIN = 80;
 const uint RANDMAP_DELAY_MAX = 1100;
 
-bool Cmd_CallvoteValidate( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_CallvoteValidate( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String votename = argsString.getToken( 0 );
 
@@ -69,7 +69,7 @@ bool Cmd_CallvoteValidate( Client@ client, const String &cmdString, const String
     return true;
 }
 
-bool Cmd_CallvotePassed( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_CallvotePassed( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String votename = argsString.getToken( 0 );
 
@@ -84,7 +84,7 @@ bool Cmd_CallvotePassed( Client@ client, const String &cmdString, const String &
 
 const int MAX_FLOOD_MESSAGES = 32;
 
-bool Cmd_PrivateMessage( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_PrivateMessage( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     if ( client.muted > 0 )
     {
@@ -148,7 +148,7 @@ bool Cmd_PrivateMessage( Client@ client, const String &cmdString, const String &
     return true;
 }
 
-bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_RaceRestart( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     Player@ player = RACE_GetPlayer( client );
 
@@ -206,19 +206,19 @@ bool Cmd_RaceRestart( Client@ client, const String &cmdString, const String &arg
     return true;
 }
 
-bool Cmd_Practicemode( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Practicemode( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     RACE_GetPlayer( client ).togglePracticeMode();
     return true;
 }
 
-bool Cmd_Noclip( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Noclip( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     Player@ player = RACE_GetPlayer( client );
     return player.toggleNoclip();
 }
 
-bool Cmd_Position( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Position( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String action = argsString.getToken( 0 );
     Player@ player = RACE_GetPlayer ( client );
@@ -289,7 +289,7 @@ bool Cmd_Position( Client@ client, const String &cmdString, const String &argsSt
     }
 }
 
-void showTop( Client@ client, const String &mapName, bool full )
+void showTop( Client@ client, const String &in mapName, bool full )
 {
     RecordTime[]@ records;
     if ( mapName == "" )
@@ -344,30 +344,30 @@ void showTop( Client@ client, const String &mapName, bool full )
     }
 }
 
-bool Cmd_Top( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Top( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String mapName = argsString.getToken( 0 ).tolower().replace( "/", "" );
     showTop( client, mapName, false );
     return true;
 }
 
-bool Cmd_FullTop( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_FullTop( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     showTop( client, "", true );
     return true;
 }
 
-bool Cmd_CPs( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_CPs( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     return RACE_GetPlayer( client ).showCPs( argsString.getToken( 0 ), argsString.getToken( 1 ), false );
 }
 
-bool Cmd_CPsFull( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_CPsFull( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     return RACE_GetPlayer( client ).showCPs( argsString.getToken( 0 ), argsString.getToken( 1 ), true );
 }
 
-bool Cmd_LastRecs( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_LastRecs( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     return lastRecords.show( client.getEnt() );
 }
@@ -375,7 +375,7 @@ bool Cmd_LastRecs( Client@ client, const String &cmdString, const String &argsSt
 const uint MAPS_PER_PAGE = 30;
 uint[] maplist_page( maxClients );
 
-bool Cmd_Maplist( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Maplist( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String arg1 = argsString.getToken( 0 ).tolower();
     String arg2 = argsString.getToken( 1 ).tolower();
@@ -445,7 +445,7 @@ bool Cmd_Maplist( Client@ client, const String &cmdString, const String &argsStr
     return true;
 }
 
-bool Cmd_PreRandmap( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_PreRandmap( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     Player@ player = RACE_GetPlayer( client );
     String pattern = argsString.getToken( 0 );
@@ -466,7 +466,7 @@ bool Cmd_PreRandmap( Client@ client, const String &cmdString, const String &args
     return true;
 }
 
-bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Help( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     String command = argsString.getToken( 0 ).tolower();
     String subcommand = argsString.getToken( 1 ).tolower();
@@ -701,18 +701,18 @@ bool Cmd_Help( Client@ client, const String &cmdString, const String &argsString
     return true;
 }
 
-bool Cmd_Rules( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Rules( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     RACE_ShowRules(client, 0);
     return true;
 }
 
-bool Cmd_Mark( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool Cmd_Mark( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     return RACE_GetPlayer( client ).setMarker( argsString.getToken( 0 ) );
 }
 
-bool RACE_HandleCommand( Client@ client, const String &cmdString, const String &argsString, int argc )
+bool RACE_HandleCommand( Client@ client, const String &in cmdString, const String &in argsString, int argc )
 {
     if ( cmdString == "gametypemenu" )
         return Cmd_GametypeMenu( client, cmdString, argsString, argc );

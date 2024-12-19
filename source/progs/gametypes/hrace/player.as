@@ -205,7 +205,7 @@ class Player
         else
             speed = "\u00A0";
 
-        return "&p " + playerID + " " + ent.client.clanName + " " + pos + " " + this.bestRun.finishTime + " " + diff + " " + speed + " " + ent.client.ping + " " + racing + " ";
+        return "&p " + playerID + " " + playerID + " " + ent.client.clanName + " " + pos + " " + this.bestRun.finishTime + " " + diff + " " + speed + " " + ent.client.ping + " " + racing + " ";
     }
 
     bool preRace()
